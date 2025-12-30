@@ -1,0 +1,34 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<div class="container" style="max-width: 600px; margin-top: 4rem;">
+    <h2 class="section-title">Checkout</h2>
+    <div style="background: white; padding: 2rem; border: 1px solid #ddd; border-radius: 8px;">
+        
+        <h3 style="text-align:center; color: var(--brand-gold);">Total: ${{ total_price }}</h3>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div style="margin-bottom: 15px;">
+                <label>Full Name</label>
+                <input type="text" name="name" required style="width: 100%; padding: 8px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>Phone Number</label>
+                <input type="tel" name="phone" required style="width: 100%; padding: 8px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>City</label>
+                <input type="text" name="city" required style="width: 100%; padding: 8px;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label>Address Details</label>
+                <textarea name="address" rows="3" required style="width: 100%; padding: 8px;"></textarea>
+            </div>
+            <button type="submit" class="btn-view" style="width: 100%; background: var(--brand-navy); color: white; cursor: pointer;">
+                Confirm Order
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

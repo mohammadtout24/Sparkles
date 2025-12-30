@@ -1,0 +1,30 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<div class="container" style="text-align: center; margin-top: 5rem; max-width: 600px;">
+    
+    <div style="font-size: 4rem; margin-bottom: 1rem;">💌</div>
+    
+    <h2 class="section-title">Order Generated!</h2>
+    
+    <p style="font-size: 1.1rem; margin-bottom: 2rem;">
+        Your email app should open automatically with your order details.
+        <br>
+        <strong>Please click "Send" to finish.</strong>
+    </p>
+
+    <a id="emailBtn" href="{{ mailto_link }}" class="btn-view" style="background-color: var(--brand-navy); color: white; padding: 15px 30px; text-decoration: none; border-radius: 50px;">
+        Click here if Email didn't open
+    </a>
+    
+    <br><br>
+    <a href="{% url 'home' %}" style="color: #888; text-decoration: underline;">Return to Home</a>
+
+</div>
+
+<script>
+    window.onload = function() {
+        document.getElementById('emailBtn').click();
+    }
+</script>
+{% endblock %}

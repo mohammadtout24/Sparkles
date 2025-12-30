@@ -1,0 +1,64 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Sparkle by Rayan</title>
+
+    <link rel="stylesheet" href="{% static 'store/css/style.css' %}" />
+  </head>
+
+  <body>
+    <nav
+      class="navbar"
+      style="background-image: url('{% static 'store/images/logo.PNG' %}')"
+    >
+      <div class="mobile-controls">
+        <a href="{% url 'cart_view' %}" class="mobile-cart"> Cart </a>
+
+        <button class="hamburger-menu" onclick="toggleMenu()">☰</button>
+      </div>
+
+      <div class="nav-links" id="navLinks">
+    <a href="{% url 'home' %}">Home</a>
+    
+    
+
+    {% for category in menu_categories %}
+       <a href="{% url 'category_list' category.slug %}">{{ category.name }}</a>
+    {% endfor %}
+    <a href="{% url 'cart_view' %}" class="desktop-cart">Cart</a>
+    <a href="{% url 'about' %}">Our Story</a>
+    <a href="{% url 'contact' %}">Contact</a>
+    <a href="{% url 'reviews' %}">Reviews</a>
+</div>
+    </nav>
+
+    <script>
+      function toggleMenu() {
+        var menu = document.getElementById("navLinks");
+
+        if (menu.style.display === "flex") {
+          menu.style.display = "none";
+        } else {
+          menu.style.display = "flex";
+        }
+      }
+    </script>
+
+    <main>{% block content %} {% endblock %}</main>
+
+    <footer>
+      <p class="brand-font" style="color: var(--brand-gold); font-size: 1.2rem">
+        RayanSparkles
+      </p>
+
+      <p style="font-size: 0.8rem; opacity: 0.7">By Rayan &copy; 2025</p>
+    </footer>
+  </body>
+</html>

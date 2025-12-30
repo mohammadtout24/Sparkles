@@ -1,0 +1,507 @@
+/* Import Fonts */
+
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap");
+
+:root {
+  --brand-navy: #203a5c;
+
+  --brand-gold: #d4af37;
+
+  --brand-light: #f9f9f9;
+
+  --text-dark: #333;
+}
+
+body {
+  font-family: "Lato", sans-serif;
+
+  color: var(--text-dark);
+
+  margin: 0;
+
+  padding: 0;
+
+  background-color: var(--brand-light);
+}
+
+/* --- Typography --- */
+
+h1,
+h2,
+h3,
+.brand-font {
+  font-family: "Playfair Display", serif;
+}
+
+/* --- Navbar --- */
+
+.navbar {
+  padding: 1rem 2rem;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+}
+
+.nav-links a {
+  color: #fff;
+
+  text-decoration: none;
+
+  margin-left: 20px;
+
+  font-size: 0.9rem;
+
+  text-transform: uppercase;
+
+  letter-spacing: 1px;
+
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: var(--brand-gold);
+}
+
+/* --- Hero Section --- */
+
+.hero {
+  color: white;
+
+  text-align: center;
+
+  margin-bottom: 2rem;
+
+  padding: 12% 0%;
+
+  background-size: cover;
+
+  background-position: center;
+
+  background-repeat: no-repeat;
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+
+  color: var(--brand-gold);
+
+  margin-bottom: 0.5rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+
+  font-weight: 300;
+
+  color: #ddd;
+}
+
+/* --- Product Grid --- */
+
+.container {
+  max-width: 1200px;
+
+  margin: 0 auto;
+
+  padding: 0 20px;
+}
+
+.section-title {
+  text-align: center;
+
+  color: var(--brand-navy);
+
+  margin-bottom: 2rem;
+
+  font-size: 2rem;
+}
+
+.product-grid {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+
+  gap: 30px;
+
+  margin-bottom: 4rem;
+}
+
+.product-card {
+  background: white;
+
+  border: 1px solid #eee;
+
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  text-align: center;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+
+  border-color: var(--brand-gold);
+}
+
+.product-image {
+  width: 100%;
+
+  height: 300px;
+
+  object-fit: cover;
+
+  background-color: #f0f0f0;
+}
+
+.product-info {
+  padding: 15px;
+}
+
+.product-category {
+  font-size: 0.8rem;
+
+  color: #888;
+
+  text-transform: uppercase;
+
+  letter-spacing: 1px;
+}
+
+.product-title {
+  font-size: 1.2rem;
+
+  margin: 10px 0;
+
+  color: var(--brand-navy);
+}
+
+.product-price {
+  font-size: 1.1rem;
+
+  color: var(--brand-gold);
+
+  font-weight: bold;
+
+  font-family: "Playfair Display", serif;
+}
+
+.btn-view {
+  display: inline-block;
+
+  margin-top: 10px;
+
+  padding: 8px 20px;
+
+  border: 1px solid var(--brand-navy);
+
+  color: var(--brand-navy);
+
+  text-decoration: none;
+
+  transition: all 0.3s;
+}
+
+.btn-view:hover {
+  background-color: var(--brand-navy);
+
+  color: var(--brand-gold);
+}
+
+/* --- Footer --- */
+
+footer {
+  background-color: var(--brand-navy);
+
+  color: white;
+
+  text-align: center;
+
+  padding: 2rem;
+
+  margin-top: auto;
+}
+
+/* --- Product Detail Page --- */
+
+.detail-container {
+  max-width: 1000px;
+
+  margin: 4rem auto;
+
+  padding: 0 20px;
+
+  display: flex;
+
+  gap: 50px;
+
+  align-items: center; /* Vertically center */
+}
+
+/* Mobile responsive: Stack them on small screens */
+
+@media (max-width: 768px) {
+  .detail-container {
+    flex-direction: column;
+  }
+}
+
+.detail-image {
+  flex: 1;
+}
+
+.detail-image img {
+  width: 100%;
+
+  border-radius: 4px;
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.detail-info {
+  flex: 1;
+}
+
+.detail-category {
+  color: #888;
+
+  text-transform: uppercase;
+
+  letter-spacing: 2px;
+
+  font-size: 0.9rem;
+
+  margin-bottom: 10px;
+}
+
+.detail-title {
+  font-size: 2.5rem;
+
+  color: var(--brand-navy);
+
+  margin: 0 0 20px 0;
+
+  font-family: "Playfair Display", serif;
+}
+
+.detail-price {
+  font-size: 1.5rem;
+
+  color: var(--brand-gold);
+
+  font-weight: bold;
+
+  margin-bottom: 30px;
+
+  font-family: "Playfair Display", serif;
+}
+
+.detail-description {
+  line-height: 1.8;
+
+  color: #555;
+
+  margin-bottom: 40px;
+}
+
+/* WhatsApp Button Style */
+
+.btn-whatsapp {
+  background-color: #25d366; /* WhatsApp Green */
+
+  color: white;
+
+  padding: 15px 30px;
+
+  text-decoration: none;
+
+  font-weight: bold;
+
+  border-radius: 50px;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  transition: background 0.3s;
+
+  border: none;
+
+  cursor: pointer;
+
+  font-size: 1rem;
+}
+
+.btn-whatsapp:hover {
+  background-color: #128c7e;
+}
+
+/* =========================================
+
+   MOBILE MENU & LAYOUT (Max-width 768px)
+
+   ========================================= */
+
+/* Default: Hide Mobile Controls on Desktop */
+
+.mobile-controls {
+  display: none;
+}
+
+.desktop-cart {
+  display: inline-block;
+}
+
+@media (max-width: 768px) {
+  /* 1. Navbar Layout */
+
+  .navbar {
+    flex-direction: row; /* Keep Logo Left, Icons Right */
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 1rem 20px;
+
+    position: relative; /* Needed for dropdown positioning */
+  }
+
+  .nav-logo img {
+    height: 50px; /* Small logo for phone */
+  }
+
+  /* 2. Mobile Controls (Cart + Menu Button) */
+
+  .mobile-controls {
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+  }
+
+  .mobile-cart {
+    text-decoration: none;
+
+    color: white;
+
+    font-weight: bold;
+
+    font-size: 0.9rem;
+  }
+
+  .hamburger-menu {
+    background: none;
+
+    border: none;
+
+    color: var(--brand-gold);
+
+    font-size: 2rem;
+
+    cursor: pointer;
+
+    padding: 0;
+  }
+
+  .desktop-cart {
+    display: none; /* Hide duplicate cart inside menu */
+  }
+
+  .cart-bubble {
+    position: absolute;
+
+    top: -8px;
+
+    right: -12px;
+
+    background-color: #ff4444; /* Bright Red */
+
+    color: white;
+
+    font-size: 0.75rem;
+
+    font-weight: bold;
+
+    padding: 2px 6px;
+
+    border-radius: 50%; /* Makes it a circle */
+
+    border: 2px solid var(--brand-navy); /* Matches navbar to create a "cutout" look */
+
+    min-width: 15px;
+
+    text-align: center;
+  }
+
+  /* 3. The Dropdown List (Hidden by default) */
+
+  .nav-links {
+    display: none; /* HIDDEN INITIALLY */
+
+    position: absolute;
+
+    top: 100%; /* Push it exactly below the header */
+
+    left: 0;
+
+    width: 100%;
+
+    background-color: var(--brand-navy);
+
+    flex-direction: column; /* Stack items vertically */
+
+    padding: 20px 0;
+
+    z-index: 100; /* Ensure it floats on top of products */
+
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* When JS adds this style, it becomes flex */
+
+  .nav-links a {
+    margin: 10px 0;
+
+    text-align: center;
+
+    display: block;
+
+    width: 100%;
+
+    padding: 10px 0;
+  }
+
+  /* 4. Product Grid Fix (2 Columns) */
+
+  .product-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 15px;
+  }
+
+  .product-image {
+    height: 180px;
+  }
+
+  .btn-view {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .hero {
+    height: 0%;
+
+    padding: auto auto;
+
+    background-size: cover;
+  }
+}

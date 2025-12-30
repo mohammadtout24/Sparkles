@@ -1,0 +1,64 @@
+{% extends 'store/base.html' %}
+
+{% block content %}
+<div class="container" style="margin-top: 4rem; max-width: 800px;">
+    
+    <h2 class="section-title">Customer Reviews</h2>
+
+    <div style="background: white; padding: 2rem; border-radius: 8px; border: 1px solid #eee; margin-bottom: 3rem;">
+        <h3 style="margin-bottom: 20px;">Write a Review</h3>
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div style="margin-bottom: 15px;">
+                <label>Name</label>
+                <input type="text" name="name" required class="form-control" style="width: 100%; padding: 8px;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label>Rating</label>
+                <select name="stars" style="width: 100%; padding: 8px;">
+                    <option value="5">★★★★★ (5 Stars)</option>
+                    <option value="4">★★★★ (4 Stars)</option>
+                    <option value="3">★★★ (3 Stars)</option>
+                    <option value="2">★★ (2 Stars)</option>
+                    <option value="1">★ (1 Star)</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label>Review</label>
+                <textarea name="text" required rows="3" style="width: 100%; padding: 8px;"></textarea>
+            </div>
+
+            <button type="submit" class="btn-view" style="background: var(--brand-navy); color: white; cursor: pointer;">
+                Submit Review
+            </button>
+        </form>
+    </div>
+
+    <div class="review-list">
+        {% for review in reviews %}
+        <div style="background: #f9f9f9; padding: 20px; border-bottom: 1px solid #ddd; margin-bottom: 20px; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <strong class="brand-font" style="font-size: 1.1rem;">{{ review.name }}</strong>
+                <span style="color: #ccc; font-size: 0.9rem;">{{ review.created_at|date:"M d, Y" }}</span>
+            </div>
+            
+            <div style="color: var(--brand-gold); margin-bottom: 10px;">
+                {% if review.stars == 5 %}★★★★★{% endif %}
+                {% if review.stars == 4 %}★★★★{% endif %}
+                {% if review.stars == 3 %}★★★{% endif %}
+                {% if review.stars == 2 %}★★{% endif %}
+                {% if review.stars == 1 %}★{% endif %}
+            </div>
+
+            <p style="color: #555; line-height: 1.6;">{{ review.text }}</p>
+        </div>
+        {% empty %}
+            <p style="text-align: center;">No reviews yet. Be the first to write one!</p>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
