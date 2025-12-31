@@ -116,5 +116,4 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'rayansparkles@gmail.com'
 EMAIL_HOST_PASSWORD = 'gyzk depz wrif lwbo'
-EMAIL_TIMEOUT = 10
 
