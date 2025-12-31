@@ -1,7 +1,4 @@
 from django.db import models
-from db_file_storage.storage import DatabaseFileStorage
-
-db_storage = DatabaseFileStorage()
 
 
 class Category(models.Model):
@@ -16,11 +13,22 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    category = models.ForeignKey(Category, related_name="products", on_delete=models.CASCADE)
+    category = models.ForeignKey(
+        Category,
+        related_name="products",
+        on_delete=models.CASCADE
+    )
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.ImageField(storage=db_storage, blank=True, null=True)
+
+    # ✅ Cloudinary handles storage automatically
+    image = models.ImageField(
+        upload_to="accessories/",
+        blank=True,
+        null=True
+    )
+
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
