@@ -9,77 +9,67 @@ from .forms import ReviewForm
 
 
 def checkout(request):
-    cart = request.session.get("cart", {})
-
+    cart = request.session.get('cart', {})
+    
     # Redirect if cart is empty
     if not cart:
-        return redirect("home")
+        return redirect('home')
 
-    # 1) Calculate totals
+    # 1. Calculate Totals
     total_price = 0
     items_text = ""
     products = Product.objects.filter(pk__in=cart.keys())
 
     for product in products:
-        quantity = cart.get(str(product.pk), 0)
+        quantity = cart[str(product.pk)]
         subtotal = product.price * quantity
         total_price += subtotal
         items_text += f"- {product.name} (x{quantity}): ${subtotal}\n"
 
-    # 2) Handle POST
-    if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-        phone = request.POST.get("phone", "").strip()
-        address = request.POST.get("address", "").strip()
-        city = request.POST.get("city", "").strip()
+    # 2. Handle Form Submission
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        phone = request.POST.get('phone')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
 
+        # Prepare the email content
         subject = f"New Order from {name}!"
         message = f"""
-You have received a new order via the website.
+        You have received a new order via the website.
 
-CUSTOMER DETAILS
-----------------
-Name:    {name}
-Phone:   {phone}
-Address: {address}, {city}
+        CUSTOMER DETAILS
+        ----------------
+        Name:    {name}
+        Phone:   {phone}
+        Address: {address}, {city}
 
-ORDER SUMMARY
--------------
-{items_text}
+        ORDER SUMMARY
+        -------------
+        {items_text}
+        
+        TOTAL: ${total_price}
+        """
 
-TOTAL: ${total_price}
-""".strip()
-
-        # ✅ Always place the order (clear cart) even if email fails
-        # Render may block/timeout SMTP, so we must not crash the request.
-        email_sent = False
         try:
+            # Send email to yourself
             send_mail(
-                subject=subject,
-                message=message,
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=["rayanmahmoudmasri@gmail.com"],
-                fail_silently=True,  # ✅ prevents 500
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,    # From email
+                ['rayanmahmoudmasri@gmail.com'], # To email (You)
+                fail_silently=False,
             )
-            email_sent = True
-        except Exception:
-            # We keep it silent so checkout never fails
-            email_sent = False
+            
+            # clear the cart
+            request.session['cart'] = {}
+            messages.success(request, "Order placed successfully!")
+            return redirect('home')
+            
+        except Exception as e:
+            messages.error(request, f"Error sending email: {e}")
 
-        # Clear the cart and confirm order
-        request.session["cart"] = {}
-
-        if email_sent:
-            messages.success(request, "Order placed successfully! ✅ Email sent.")
-        else:
-            messages.success(
-                request,
-                "Order placed successfully! ✅ (Email could not be sent right now.)"
-            )
-
-        return redirect("home")
-
-    return render(request, "store/checkout.html", {"total_price": total_price})
+    return render(request, 'store/checkout.html', {'total_price': total_price})
 
 
 def home(request):
