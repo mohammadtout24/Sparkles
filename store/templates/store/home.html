@@ -2,23 +2,24 @@
 {% load static %}
 {% block content %}
 
-<section class="hero" style="background-image: url('{% static 'store/images/logo.PNG' %}');">
-    <!-- <h1>Rayan Sparkles</h1>
-    <p>Shine bright, Sparkle always!</p> -->
+<section class="hero" style="background-image: url('{% static "store/images/logo.PNG" %}');">
+    <!-- Optional hero text -->
 </section>
 
 <div class="container">
     <h2 class="section-title">Latest Collections</h2>
-    
+
     <div class="product-grid">
         {% for product in products %}
             <div class="product-card">
                 {% if product.image %}
                     <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
                 {% else %}
-                    <div class="product-image" style="background: #ddd; display:flex; align-items:center; justify-content:center;">No Image</div>
+                    <div class="product-image" style="background:#ddd; display:flex; align-items:center; justify-content:center;">
+                        No Image
+                    </div>
                 {% endif %}
-                
+
                 <div class="product-info">
                     <div class="product-category">{{ product.category.name }}</div>
                     <h3 class="product-title brand-font">{{ product.name }}</h3>
@@ -26,6 +27,8 @@
                     <a href="{% url 'product_detail' product.pk %}" class="btn-view">View Details</a>
                 </div>
             </div>
+        {% empty %}
+            <p>No products found.</p>
         {% endfor %}
     </div>
 </div>
