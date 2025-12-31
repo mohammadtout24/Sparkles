@@ -22,7 +22,12 @@ from dotenv import load_dotenv
 
 
 
-load_dotenv()
+if os.getenv("RENDER"):
+    DEBUG = False
+else:
+    load_dotenv()
+    DEBUG = os.getenv("DEBUG") == "True"
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
