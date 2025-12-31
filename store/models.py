@@ -22,12 +22,8 @@ class Product(models.Model):
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
-    # ✅ Cloudinary handles storage automatically
-    image = models.ImageField(
-        upload_to="accessories/",
-        blank=True,
-        null=True
-    )
+    # ✅ With STORAGES default = Cloudinary, this uploads to Cloudinary
+    image = models.ImageField(upload_to="accessories/", blank=True, null=True)
 
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
