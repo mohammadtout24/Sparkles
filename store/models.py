@@ -15,7 +15,10 @@ class Product(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2) # e.g., 25.00
-    image = models.ImageField(upload_to='accessories/') # Requires Pillow
+    from db_file_storage.model_utils import delete_file, save_file
+    from db_file_storage.storage import DatabaseFileStorage
+    db_storage = DatabaseFileStorage()
+    image = models.ImageField(storage=db_storage)
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
