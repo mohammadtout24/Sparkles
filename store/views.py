@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 import urllib.parse
 import traceback  # ✅ add this
+import resend
 
 from .models import Product, Category, Review
 from .forms import ReviewForm
@@ -11,27 +12,21 @@ from .forms import ReviewForm
 
 def checkout(request):
     cart = request.session.get('cart', {})
-
-    # Redirect if cart is empty
     if not cart:
-        messages.warning(request, "Your cart is empty.")
         return redirect('home')
 
-    # 1) Calculate totals + build email text
     total_price = 0
     items_text = ""
     products = Product.objects.filter(pk__in=cart.keys())
 
     for product in products:
-        quantity = cart.get(str(product.pk), 0)  # ✅ safer than cart[str(pk)]
+        quantity = cart.get(str(product.pk), 0)
         if quantity <= 0:
             continue
-
         subtotal = product.price * quantity
         total_price += subtotal
         items_text += f"- {product.name} (x{quantity}): ${subtotal}\n"
 
-    # 2) Handle form submission
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         phone = request.POST.get('phone', '').strip()
@@ -56,35 +51,30 @@ TOTAL: ${total_price}
 """.strip()
 
         try:
-            # ✅ To email: use env variable if you added it, otherwise fallback
-            to_email = getattr(settings, "DEFAULT_TO_EMAIL", None) or "rayanmahmoudmasri@gmail.com"
+            resend.api_key = settings.RESEND_API_KEY
 
-            send_mail(
-                subject=subject,
-                message=message,
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[to_email],
-                fail_silently=False,
-            )
+            to_email = settings.DEFAULT_TO_EMAIL or "rayanmahmoudmasri@gmail.com"
+            from_email = settings.FROM_EMAIL or "onboarding@resend.dev"
 
-            # clear cart
+            resend.Emails.send({
+                "from": from_email,
+                "to": [to_email],
+                "subject": subject,
+                "text": message,
+            })
+
             request.session['cart'] = {}
             messages.success(request, "Order placed successfully!")
             return redirect('home')
 
         except Exception as e:
-            # ✅ full traceback in logs (Render / terminal)
-            print("====== EMAIL SENDING ERROR ======")
+            print("====== RESEND ERROR ======")
             print("Exception:", repr(e))
             traceback.print_exc()
-            print("=================================")
+            print("==========================")
+            messages.error(request, "Error sending email. Check server logs.")
 
-            messages.error(request, "Error sending email. Check server logs for details.")
-
-    return render(request, 'store/checkout.html', {
-        'total_price': total_price
-    })
-
+    return render(request, 'store/checkout.html', {'total_price': total_price})
 
 def home(request):
     products = Product.objects.all()
