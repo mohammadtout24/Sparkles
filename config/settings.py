@@ -10,8 +10,10 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load .env only locally
-if not os.getenv("RENDER"):
-    load_dotenv()
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+DEFAULT_TO_EMAIL = os.getenv("DEFAULT_TO_EMAIL")
+FROM_EMAIL = os.getenv("FROM_EMAIL", "onboarding@resend.dev")
+
 
 SECRET_KEY = os.getenv("SECRET_KEY", "unsafe-dev-secret-key")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
