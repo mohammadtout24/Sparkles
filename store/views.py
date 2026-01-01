@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
 import urllib.parse
+import traceback  # ✅ add this
 
 from .models import Product, Category, Review
 from .forms import ReviewForm
@@ -10,66 +11,80 @@ from .forms import ReviewForm
 
 def checkout(request):
     cart = request.session.get('cart', {})
-    
+
     # Redirect if cart is empty
     if not cart:
+        messages.warning(request, "Your cart is empty.")
         return redirect('home')
 
-    # 1. Calculate Totals
+    # 1) Calculate totals + build email text
     total_price = 0
     items_text = ""
     products = Product.objects.filter(pk__in=cart.keys())
 
     for product in products:
-        quantity = cart[str(product.pk)]
+        quantity = cart.get(str(product.pk), 0)  # ✅ safer than cart[str(pk)]
+        if quantity <= 0:
+            continue
+
         subtotal = product.price * quantity
         total_price += subtotal
         items_text += f"- {product.name} (x{quantity}): ${subtotal}\n"
 
-    # 2. Handle Form Submission
+    # 2) Handle form submission
     if request.method == 'POST':
-        name = request.POST.get('name')
-        phone = request.POST.get('phone')
-        address = request.POST.get('address')
-        city = request.POST.get('city')
+        name = request.POST.get('name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        address = request.POST.get('address', '').strip()
+        city = request.POST.get('city', '').strip()
 
-        # Prepare the email content
         subject = f"New Order from {name}!"
         message = f"""
-        You have received a new order via the website.
+You have received a new order via the website.
 
-        CUSTOMER DETAILS
-        ----------------
-        Name:    {name}
-        Phone:   {phone}
-        Address: {address}, {city}
+CUSTOMER DETAILS
+----------------
+Name:    {name}
+Phone:   {phone}
+Address: {address}, {city}
 
-        ORDER SUMMARY
-        -------------
-        {items_text}
-        
-        TOTAL: ${total_price}
-        """
+ORDER SUMMARY
+-------------
+{items_text}
+
+TOTAL: ${total_price}
+""".strip()
 
         try:
-            # Send email to yourself
+            # ✅ To email: use env variable if you added it, otherwise fallback
+            to_email = getattr(settings, "DEFAULT_TO_EMAIL", None) or "rayanmahmoudmasri@gmail.com"
+
             send_mail(
-                subject,
-                message,
-                settings.EMAIL_HOST_USER,    # From email
-                ['rayanmahmoudmasri@gmail.com'], # To email (You)
+                subject=subject,
+                message=message,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[to_email],
                 fail_silently=False,
             )
-            
-            # clear the cart
+
+            # clear cart
             request.session['cart'] = {}
             messages.success(request, "Order placed successfully!")
             return redirect('home')
-            
-        except Exception as e:
-            messages.error(request, f"Error sending email: {e}")
 
-    return render(request, 'store/checkout.html', {'total_price': total_price})
+        except Exception as e:
+            # ✅ full traceback in logs (Render / terminal)
+            print("====== EMAIL SENDING ERROR ======")
+            print("Exception:", repr(e))
+            traceback.print_exc()
+            print("=================================")
+
+            messages.error(request, "Error sending email. Check server logs for details.")
+
+    return render(request, 'store/checkout.html', {
+        'total_price': total_price
+    })
+
 
 def home(request):
     products = Product.objects.all()
@@ -92,8 +107,8 @@ def add_to_cart(request, pk):
     str_pk = str(pk)
 
     cart[str_pk] = cart.get(str_pk, 0) + 1
-
     request.session["cart"] = cart
+
     messages.success(request, "Item added to cart!")
     return redirect("cart_view")
 
