@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.core.mail import send_mail
 import urllib.parse
-import traceback  # ✅ add this
+import traceback
 import resend
 
 from .models import Product, Category, Review
@@ -17,12 +17,23 @@ def checkout(request):
 
     total_price = 0
     items_text = ""
+    # Fetch all products in cart
     products = Product.objects.filter(pk__in=cart.keys())
+
+    # --- 1. VALIDATION: Check stock BEFORE processing ---
+    for product in products:
+        cart_qty = cart.get(str(product.pk), 0)
+        if product.quantity < cart_qty:
+            messages.error(request, f"Sorry, only {product.quantity} left of '{product.name}'. Please update your cart.")
+            return redirect('cart_view')
+    # ----------------------------------------------------
 
     for product in products:
         quantity = cart.get(str(product.pk), 0)
+        # Skip invalid quantities
         if quantity <= 0:
             continue
+            
         subtotal = product.price * quantity
         total_price += subtotal
         items_text += f"- {product.name} (x{quantity}): ${subtotal}\n"
@@ -63,6 +74,14 @@ TOTAL: ${total_price}
                 "text": message,
             })
 
+            # --- 2. SUCCESS: Reduce Stock ---
+            for product in products:
+                qty_sold = cart.get(str(product.pk), 0)
+                if product.quantity >= qty_sold:
+                    product.quantity -= qty_sold
+                    product.save()
+            # --------------------------------
+
             request.session['cart'] = {}
             messages.success(request, "Order placed successfully!")
             return redirect('home')
@@ -80,28 +99,32 @@ def home(request):
     products = Product.objects.all()
     return render(request, "store/home.html", {"products": products})
 
-
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
     return render(request, "store/product_detail.html", {"product": product})
-
 
 def category_list(request, slug):
     category = get_object_or_404(Category, slug=slug)
     products = Product.objects.filter(category=category, is_available=True)
     return render(request, "store/category_list.html", {"category": category, "products": products})
 
-
 def add_to_cart(request, pk):
+    product = get_object_or_404(Product, pk=pk)
     cart = request.session.get("cart", {})
     str_pk = str(pk)
 
-    cart[str_pk] = cart.get(str_pk, 0) + 1
+    current_qty = cart.get(str_pk, 0)
+
+    # Check if adding 1 more exceeds stock
+    if current_qty + 1 > product.quantity:
+        messages.error(request, "Sorry, we don't have enough stock!")
+        return redirect('product_detail', pk=pk)
+
+    cart[str_pk] = current_qty + 1
     request.session["cart"] = cart
 
     messages.success(request, "Item added to cart!")
     return redirect("cart_view")
-
 
 def remove_from_cart(request, pk):
     cart = request.session.get("cart", {})
@@ -112,7 +135,6 @@ def remove_from_cart(request, pk):
         request.session["cart"] = cart
 
     return redirect("cart_view")
-
 
 def cart_view(request):
     cart = request.session.get("cart", {})
@@ -144,14 +166,11 @@ def cart_view(request):
         "whatsapp_url": f"https://wa.me/96171854885?text={encoded_message}",
     })
 
-
 def about(request):
     return render(request, "store/about.html")
 
-
 def contact(request):
     return render(request, "store/contact.html")
-
 
 def reviews_page(request):
     reviews = Review.objects.all().order_by("-created_at")
