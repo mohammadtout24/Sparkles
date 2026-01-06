@@ -23,7 +23,12 @@
                 <div class="product-info">
                     <div class="product-category">{{ product.category.name }}</div>
                     <h3 class="product-title brand-font">{{ product.name }}</h3>
-                    <div class="product-price">${{ product.price }}</div>
+                    <div class="product-price">
+                    ${{ product.price }}
+                    {% if product.quantity == 0 %}
+                    <span style="color: red; font-size: 0.8rem; margin-left: 10px;">(Sold Out)</span>
+                    {% endif %}
+                    </div>
                     <a href="{% url 'product_detail' product.pk %}" class="btn-view">View Details</a>
                 </div>
             </div>
