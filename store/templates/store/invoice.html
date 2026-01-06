@@ -1,0 +1,50 @@
+{% extends 'store/base.html' %}
+{% block content %}
+
+<div class="container" style="margin-top: 4rem; max-width: 600px; background: white; padding: 2rem; border: 1px solid #ddd; border-radius: 8px;">
+    
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="color: var(--brand-navy);">Order Confirmed!</h2>
+        <p>Thank you for your purchase, {{ name }}.</p>
+    </div>
+
+    <div style="border-bottom: 2px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem;">
+        <h3 class="section-title" style="font-size: 1.2rem; margin-bottom: 0.5rem;">Customer Details</h3>
+        <p><strong>Phone:</strong> {{ phone }}</p>
+        <p><strong>Address:</strong> {{ address }}, {{ city }}</p>
+        <p><strong>Region:</strong> {{ region_display }}</p>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+        <h3 class="section-title" style="font-size: 1.2rem;">Order Summary</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            {% for item in items_summary %}
+            <tr style="border-bottom: 1px solid #f9f9f9;">
+                <td style="padding: 8px 0;">{{ item.qty }}x {{ item.name }}</td>
+                <td style="text-align: right;">${{ item.total }}</td>
+            </tr>
+            {% endfor %}
+            
+            <tr style="border-top: 2px solid #ddd;">
+                <td style="padding-top: 10px;">Subtotal</td>
+                <td style="text-align: right; padding-top: 10px;">${{ subtotal }}</td>
+            </tr>
+            <tr>
+                <td style="padding-bottom: 10px;">Delivery Charge</td>
+                <td style="text-align: right; padding-bottom: 10px;">+ ${{ delivery_fee }}</td>
+            </tr>
+            <tr style="font-weight: bold; font-size: 1.2rem; color: var(--brand-navy);">
+                <td style="padding-top: 10px; border-top: 1px solid #333;">TOTAL</td>
+                <td style="text-align: right; padding-top: 10px; border-top: 1px solid #333;">${{ final_total }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="text-align: center;">
+        <button onclick="window.print()" class="btn-view" style="background: #333; color: white; cursor: pointer;">Print Facture</button>
+        <a href="{% url 'home' %}" class="btn-view" style="margin-left: 10px;">Back to Home</a>
+    </div>
+
+</div>
+
+{% endblock %}
