@@ -1,78 +1,52 @@
 {% extends 'store/base.html' %}
 {% block content %}
 
-<div class="container" style="margin-top: 4rem; max-width: 600px;">
-    <h2 class="section-title">Checkout</h2>
+<div class="container" style="margin-top: 4rem; max-width: 800px;">
+    <h2 class="section-title">Your Shopping Bag</h2>
 
-    <form method="POST" style="background: white; padding: 2rem; border-radius: 8px; border: 1px solid #eee;">
-        {% csrf_token %}
+    {% if items %}
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--brand-navy); text-align: left;">
+                    <th style="padding: 10px;">Product</th>
+                    <th style="padding: 10px;">Qty</th>
+                    <th style="padding: 10px;">Price</th>
+                    <th style="padding: 10px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 15px 10px; display: flex; align-items: center; gap: 15px;">
+                        {% if item.product.image %}
+                            <img src="{{ item.product.image.url }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                        {% endif %}
+                        <span class="brand-font" style="font-size: 1.1rem;">{{ item.product.name }}</span>
+                    </td>
+                    <td style="padding: 10px;">{{ item.quantity }}</td>
+                    <td style="padding: 10px;">${{ item.subtotal }}</td>
+                    <td style="padding: 10px;">
+                        <a href="{% url 'remove_from_cart' item.product.pk %}" style="color: red; text-decoration: none;">&times;</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-        <div style="margin-bottom: 15px;">
-            <label>Full Name</label>
-            <input type="text" name="name" required class="form-control" style="width: 100%; padding: 10px; margin-top: 5px;">
+        <div style="text-align: right;">
+            <h3 style="margin-bottom: 20px;">Total: ${{ total_price }}</h3>
+            
+            <a href="{% url 'checkout' %}" class="btn-view" style="background-color: var(--brand-navy); color: white; text-decoration: none; padding: 15px 30px; border-radius: 50px;">
+    Proceed to Checkout
+</a>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <label>Phone Number</label>
-            <input type="tel" name="phone" required class="form-control" style="width: 100%; padding: 10px; margin-top: 5px;">
+    {% else %}
+        <div style="text-align: center; padding: 4rem;">
+            <p>Your bag is empty.</p>
+            <a href="{% url 'home' %}" class="btn-view">Continue Shopping</a>
         </div>
-
-        <div style="margin-bottom: 15px;">
-            <label>City / Region</label>
-            <input type="text" name="city" required class="form-control" style="width: 100%; padding: 10px; margin-top: 5px;">
-        </div>
-
-        <div style="margin-bottom: 15px;">
-            <label>Detailed Address</label>
-            <textarea name="address" required rows="2" class="form-control" style="width: 100%; padding: 10px; margin-top: 5px;"></textarea>
-        </div>
-
-        <div style="margin-bottom: 25px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
-            <label style="font-weight: bold;">Select Delivery Location</label>
-            <select name="delivery_region" id="deliverySelect" onchange="updateTotal()" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">
-                <option value="tripoli" data-cost="3">Tripoli & Suburbs (+$3.00)</option>
-                <option value="north" data-cost="4">Rest of North (+$4.00)</option>
-                <option value="other" data-cost="5">Beirut, South, Beqaa (+$5.00)</option>
-            </select>
-        </div>
-
-        <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-top: 20px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span>Subtotal:</span>
-                <span>${{ total_price|floatform:2 }}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #666;">
-                <span>Delivery:</span>
-                <span id="deliveryDisplay">+$3.00</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem; margin-top: 10px;">
-                <span>Total:</span>
-                <span id="finalTotal">${{ total_price|add:3|floatform:2 }}</span>
-            </div>
-        </div>
-
-        <button type="submit" class="btn-view" style="width: 100%; background: var(--brand-navy); color: white; margin-top: 20px; padding: 15px;">
-            Confirm Order
-        </button>
-    </form>
+    {% endif %}
 </div>
-
-<script>
-    function updateTotal() {
-        // Get the base subtotal from Django (converted to JS float)
-        var subtotal = parseFloat("{{ total_price }}");
-        
-        // Get selected delivery cost
-        var select = document.getElementById('deliverySelect');
-        var cost = parseFloat(select.options[select.selectedIndex].getAttribute('data-cost'));
-        
-        // Calculate total
-        var total = subtotal + cost;
-        
-        // Update the display
-        document.getElementById('deliveryDisplay').innerText = "+$" + cost.toFixed(2);
-        document.getElementById('finalTotal').innerText = "$" + total.toFixed(2);
-    }
-</script>
 
 {% endblock %}
