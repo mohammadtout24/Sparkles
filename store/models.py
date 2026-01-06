@@ -25,6 +25,8 @@ class Product(models.Model):
     # ✅ With STORAGES default = Cloudinary, this uploads to Cloudinary
     image = models.ImageField(upload_to="accessories/", blank=True, null=True)
 
+    quantity = models.IntegerField(default=0)
+
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
