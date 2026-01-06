@@ -10,120 +10,90 @@ from .models import Product, Category, Review
 from .forms import ReviewForm
 
 
-# In store/views.py
-
 def checkout(request):
     cart = request.session.get('cart', {})
     if not cart:
         return redirect('home')
 
-    # 1. Calculate Product Totals
-    subtotal = 0
-    items_summary = []
+    total_price = 0
+    items_text = ""
+    # Fetch all products in cart
     products = Product.objects.filter(pk__in=cart.keys())
 
-    # Check stock first (Validation)
+    # --- 1. VALIDATION: Check stock BEFORE processing ---
     for product in products:
         cart_qty = cart.get(str(product.pk), 0)
         if product.quantity < cart_qty:
-            messages.error(request, f"Sorry, only {product.quantity} left of '{product.name}'.")
+            messages.error(request, f"Sorry, only {product.quantity} left of '{product.name}'. Please update your cart.")
             return redirect('cart_view')
+    # ----------------------------------------------------
 
     for product in products:
         quantity = cart.get(str(product.pk), 0)
-        line_total = product.price * quantity
-        subtotal += line_total
-        
-        items_summary.append({
-            'name': product.name,
-            'qty': quantity,
-            'total': line_total
-        })
+        # Skip invalid quantities
+        if quantity <= 0:
+            continue
+            
+        subtotal = product.price * quantity
+        total_price += subtotal
+        items_text += f"- {product.name} (x{quantity}): ${subtotal}\n"
 
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         phone = request.POST.get('phone', '').strip()
         address = request.POST.get('address', '').strip()
         city = request.POST.get('city', '').strip()
-        
-        # 2. Get Delivery Option
-        region_code = request.POST.get('delivery_region', 'tripoli')
-        
-        if region_code == 'north':
-            delivery_fee = 4
-            region_display = "North (Outside Tripoli)"
-        elif region_code == 'other':
-            delivery_fee = 5
-            region_display = "Beirut / South / Beqaa"
-        else: # Default to tripoli
-            delivery_fee = 3
-            region_display = "Tripoli & Suburbs"
-
-        final_total = subtotal + delivery_fee
-
-        # 3. Prepare Email
-        items_text = ""
-        for item in items_summary:
-            items_text += f"- {item['name']} (x{item['qty']}): ${item['total']}\n"
 
         subject = f"New Order from {name}!"
         message = f"""
-NEW ORDER RECEIVED
-------------------
-Customer: {name}
-Phone:    {phone}
-Address:  {address}, {city}
-Region:   {region_display}
+You have received a new order via the website.
 
-ITEMS
------
+CUSTOMER DETAILS
+----------------
+Name:    {name}
+Phone:   {phone}
+Address: {address}, {city}
+
+ORDER SUMMARY
+-------------
 {items_text}
 
-Subtotal: ${subtotal}
-Delivery: ${delivery_fee}
-TOTAL:    ${final_total}
+TOTAL: ${total_price}
 """.strip()
 
         try:
-            # Send Email
             resend.api_key = settings.RESEND_API_KEY
+
+            to_email = settings.DEFAULT_TO_EMAIL or "rayanmahmoudmasri@gmail.com"
+            from_email = settings.FROM_EMAIL or "onboarding@resend.dev"
+
             resend.Emails.send({
-                "from": settings.FROM_EMAIL or "onboarding@resend.dev",
-                "to": [settings.DEFAULT_TO_EMAIL or "rayanmahmoudmasri@gmail.com"],
+                "from": from_email,
+                "to": [to_email],
                 "subject": subject,
                 "text": message,
             })
 
-            # Reduce Stock
+            # --- 2. SUCCESS: Reduce Stock ---
             for product in products:
                 qty_sold = cart.get(str(product.pk), 0)
                 if product.quantity >= qty_sold:
                     product.quantity -= qty_sold
                     product.save()
+            # --------------------------------
 
-            # Clear Cart
             request.session['cart'] = {}
-            
-            # 4. Show Invoice (Facture)
-            context = {
-                'name': name,
-                'phone': phone,
-                'address': address,
-                'city': city,
-                'region_display': region_display,
-                'items_summary': items_summary,
-                'subtotal': subtotal,
-                'delivery_fee': delivery_fee,
-                'final_total': final_total
-            }
-            return render(request, 'store/invoice.html', context)
+            messages.success(request, "Order placed successfully!")
+            return redirect('home')
 
         except Exception as e:
+            print("====== RESEND ERROR ======")
+            print("Exception:", repr(e))
             traceback.print_exc()
-            messages.error(request, "Error processing order. Please try again.")
+            print("==========================")
+            messages.error(request, "Error sending email. Check server logs.")
 
-    # Convert Decimal to float for JS
-    return render(request, 'store/checkout.html', {'total_price': float(subtotal)})
+    return render(request, 'store/checkout.html', {'total_price': total_price})
 
 def home(request):
     products = Product.objects.all()
