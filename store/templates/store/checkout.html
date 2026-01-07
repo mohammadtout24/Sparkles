@@ -1,40 +1,64 @@
 {% extends 'store/base.html' %}
+
 {% block content %}
 
-<div class="container" style="margin-top: 4rem; max-width: 800px;">
-    <h2 class="section-title">Your Shopping Bag</h2>
+<div class="container" style="max-width: 600px; margin-top: 4rem;"><h2 class="section-title">Checkout</h2>
 
-    {% if items %}
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
-            <thead>
-                <tr style="border-bottom: 2px solid var(--brand-navy); text-align: left;">
-                    <th style="padding: 10px;">Product</th>
-                    <th style="padding: 10px;">Qty</th>
-                    <th style="padding: 10px;">Price</th>
-                    <th style="padding: 10px;"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in items %}
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 15px 10px; display: flex; align-items: center; gap: 15px;">
-                        {% if item.product.image %}
-                            <img src="{{ item.product.image.url }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-                        {% endif %}
-                        <span class="brand-font" style="font-size: 1.1rem;">{{ item.product.name }}</span>
-                    </td>
-                    <td style="padding: 10px;">{{ item.quantity }}</td>
-                    <td style="padding: 10px;">${{ item.subtotal }}</td>
-                    <td style="padding: 10px;">
-                        <a href="{% url 'remove_from_cart' item.product.pk %}" style="color: red; text-decoration: none;">&times;</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div style="background: white; padding: 2rem; border: 1px solid #ddd; border-radius: 8px;">
 
-        <div style="text-align: right;">
-            <h3 style="margin-bottom: 20px;">Total: ${{ total_price }}</h3>
+    
+
+    <h3 style="text-align:center; color: var(--brand-gold);">Total: ${{ total_price }}</h3>
+
+    
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <div style="margin-bottom: 15px;">
+
+            <label>Full Name</label>
+
+            <input type="text" name="name" required style="width: 100%; padding: 8px;">
+
+        </div>
+
+        <div style="margin-bottom: 15px;">
+
+            <label>Phone Number</label>
+
+            <input type="tel" name="phone" required style="width: 100%; padding: 8px;">
+
+        </div>
+
+        <div style="margin-bottom: 15px;">
+
+            <label>City</label>
+
+            <input type="text" name="city" required style="width: 100%; padding: 8px;">
+
+        </div>
+
+        <div style="margin-bottom: 20px;">
+
+            <label>Address Details</label>
+
+            <textarea name="address" rows="3" required style="width: 100%; padding: 8px;"></textarea>
+
+        </div>
+
+        <button type="submit" class="btn-view" style="width: 100%; background: var(--brand-navy); color: white; cursor: pointer;">
+
+            Confirm Order
+
+        </button>
+
+    </form>
+
+</div>
+
+</div>{% endblock %}            <h3 style="margin-bottom: 20px;">Total: ${{ total_price }}</h3>
             
             <a href="{% url 'checkout' %}" class="btn-view" style="background-color: var(--brand-navy); color: white; text-decoration: none; padding: 15px 30px; border-radius: 50px;">
     Proceed to Checkout
