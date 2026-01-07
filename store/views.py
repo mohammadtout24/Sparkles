@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 import urllib.parse
 import traceback
 import resend
-
+import random
 from .models import Product, Category, Review
 from .forms import ReviewForm
 
@@ -15,9 +15,10 @@ def checkout(request):
     if not cart:
         return redirect('home')
 
-    # --- 1. Calculate Product Total ---
+    # --- 1. Prepare Data ---
     products_total = 0
-    items_list = []
+    items_summary = [] # List for the Invoice HTML
+    items_text = ""    # String for the Email
     
     products = Product.objects.filter(pk__in=cart.keys())
 
@@ -35,9 +36,16 @@ def checkout(request):
             
         subtotal = product.price * quantity
         products_total += subtotal
-        items_list.append(f"- {product.name} (x{quantity}): ${subtotal}")
-
-    items_text = "\n".join(items_list)
+        
+        # Add to list for Invoice
+        items_summary.append({
+            'name': product.name,
+            'qty': quantity,
+            'total': float(subtotal) # ensure it's a number
+        })
+        
+        # Add to string for Email
+        items_text += f"- {product.name} (x{quantity}): ${subtotal}\n"
 
     # --- 2. Handle Form Submission ---
     if request.method == 'POST':
@@ -47,7 +55,7 @@ def checkout(request):
         city = request.POST.get('city', '').strip()
         region = request.POST.get('region', '')
 
-        # Calculate Delivery Fee
+        # Calculate Fees
         delivery_fee = 0
         region_display = "Unknown"
 
@@ -62,39 +70,39 @@ def checkout(request):
             region_display = "Beirut / South / Chouf / Bikaa"
 
         final_total = products_total + delivery_fee
+        order_id = f"RS-{random.randint(10000, 99999)}" # Generate Order ID
 
         # Prepare Email
-        subject = f"New Order from {name}!"
+        subject = f"New Order {order_id} from {name}"
         message = f"""
-You have received a new order via the website.
+New Order Received!
+Order ID: {order_id}
 
-CUSTOMER DETAILS
-----------------
+CUSTOMER
+--------
 Name:    {name}
 Phone:   {phone}
 Region:  {region_display}
 City:    {city}
 Address: {address}
 
-ORDER SUMMARY
--------------
+ITEMS
+-----
 {items_text}
 
-----------------------------
-Subtotal:      ${products_total}
-Delivery Fee:  ${delivery_fee}
-----------------------------
-TOTAL TO PAY:  ${final_total}
+SUMMARY
+-------
+Subtotal:     ${products_total}
+Delivery:     ${delivery_fee}
+TOTAL:        ${final_total}
 """.strip()
 
         try:
+            # Send Email
             resend.api_key = settings.RESEND_API_KEY
-            to_email = settings.DEFAULT_TO_EMAIL or "rayanmahmoudmasri@gmail.com"
-            from_email = settings.FROM_EMAIL or "onboarding@resend.dev"
-
             resend.Emails.send({
-                "from": from_email,
-                "to": [to_email],
+                "from": settings.FROM_EMAIL,
+                "to": [settings.DEFAULT_TO_EMAIL],
                 "subject": subject,
                 "text": message,
             })
@@ -106,16 +114,31 @@ TOTAL TO PAY:  ${final_total}
                     product.quantity -= qty_sold
                     product.save()
 
+            # --- SAVE DATA FOR INVOICE PAGE ---
+            request.session['invoice_data'] = {
+                'order_id': order_id,
+                'name': name,
+                'phone': phone,
+                'address': address,
+                'city': city,
+                'region_display': region_display,
+                'items_summary': items_summary,
+                'subtotal': float(products_total),
+                'delivery_fee': delivery_fee,
+                'final_total': float(final_total),
+            }
+
+            # Clear Cart
             request.session['cart'] = {}
-            messages.success(request, f"Order placed! Total is ${final_total} (including delivery).")
-            return redirect('home')
+            
+            # Redirect to Success Page
+            return redirect('order_success')
 
         except Exception as e:
-            print("====== RESEND ERROR ======")
-            traceback.print_exc()
-            messages.error(request, "Error sending email. Check server logs.")
+            print("Email Error:", e)
+            messages.error(request, "Order processed but email failed.")
+            return redirect('home')
 
-    # Render page with just the product total (delivery is calculated after they pick region)
     return render(request, 'store/checkout.html', {'total_price': products_total})
 
 def home(request):
