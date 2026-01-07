@@ -141,6 +141,16 @@ TOTAL:        ${final_total}
 
     return render(request, 'store/checkout.html', {'total_price': products_total})
 
+def order_success(request):
+    # Retrieve the data we saved in the session
+    invoice_data = request.session.get('invoice_data')
+    
+    # Security: If no data exists (user tried to access url directly), send them home
+    if not invoice_data:
+        return redirect('home')
+
+    return render(request, 'store/invoice.html', invoice_data)
+
 def home(request):
     products = Product.objects.all()
     return render(request, "store/home.html", {"products": products})
