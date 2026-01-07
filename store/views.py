@@ -15,35 +15,55 @@ def checkout(request):
     if not cart:
         return redirect('home')
 
-    total_price = 0
-    items_text = ""
-    # Fetch all products in cart
+    # --- 1. Calculate Product Total ---
+    products_total = 0
+    items_list = []
+    
     products = Product.objects.filter(pk__in=cart.keys())
 
-    # --- 1. VALIDATION: Check stock BEFORE processing ---
+    # Validate Stock
     for product in products:
         cart_qty = cart.get(str(product.pk), 0)
         if product.quantity < cart_qty:
-            messages.error(request, f"Sorry, only {product.quantity} left of '{product.name}'. Please update your cart.")
+            messages.error(request, f"Sorry, only {product.quantity} left of '{product.name}'.")
             return redirect('cart_view')
-    # ----------------------------------------------------
 
+    # Calculate Totals
     for product in products:
         quantity = cart.get(str(product.pk), 0)
-        # Skip invalid quantities
-        if quantity <= 0:
-            continue
+        if quantity <= 0: continue
             
         subtotal = product.price * quantity
-        total_price += subtotal
-        items_text += f"- {product.name} (x{quantity}): ${subtotal}\n"
+        products_total += subtotal
+        items_list.append(f"- {product.name} (x{quantity}): ${subtotal}")
 
+    items_text = "\n".join(items_list)
+
+    # --- 2. Handle Form Submission ---
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         phone = request.POST.get('phone', '').strip()
         address = request.POST.get('address', '').strip()
         city = request.POST.get('city', '').strip()
+        region = request.POST.get('region', '')
 
+        # Calculate Delivery Fee
+        delivery_fee = 0
+        region_display = "Unknown"
+
+        if region == 'tripoli':
+            delivery_fee = 3
+            region_display = "Tripoli & Suburbs"
+        elif region == 'north':
+            delivery_fee = 4
+            region_display = "Rest of North"
+        elif region == 'other':
+            delivery_fee = 5
+            region_display = "Beirut / South / Chouf / Bikaa"
+
+        final_total = products_total + delivery_fee
+
+        # Prepare Email
         subject = f"New Order from {name}!"
         message = f"""
 You have received a new order via the website.
@@ -52,18 +72,23 @@ CUSTOMER DETAILS
 ----------------
 Name:    {name}
 Phone:   {phone}
-Address: {address}, {city}
+Region:  {region_display}
+City:    {city}
+Address: {address}
 
 ORDER SUMMARY
 -------------
 {items_text}
 
-TOTAL: ${total_price}
+----------------------------
+Subtotal:      ${products_total}
+Delivery Fee:  ${delivery_fee}
+----------------------------
+TOTAL TO PAY:  ${final_total}
 """.strip()
 
         try:
             resend.api_key = settings.RESEND_API_KEY
-
             to_email = settings.DEFAULT_TO_EMAIL or "rayanmahmoudmasri@gmail.com"
             from_email = settings.FROM_EMAIL or "onboarding@resend.dev"
 
@@ -74,26 +99,24 @@ TOTAL: ${total_price}
                 "text": message,
             })
 
-            # --- 2. SUCCESS: Reduce Stock ---
+            # Reduce Stock
             for product in products:
                 qty_sold = cart.get(str(product.pk), 0)
                 if product.quantity >= qty_sold:
                     product.quantity -= qty_sold
                     product.save()
-            # --------------------------------
 
             request.session['cart'] = {}
-            messages.success(request, "Order placed successfully!")
+            messages.success(request, f"Order placed! Total is ${final_total} (including delivery).")
             return redirect('home')
 
         except Exception as e:
             print("====== RESEND ERROR ======")
-            print("Exception:", repr(e))
             traceback.print_exc()
-            print("==========================")
             messages.error(request, "Error sending email. Check server logs.")
 
-    return render(request, 'store/checkout.html', {'total_price': total_price})
+    # Render page with just the product total (delivery is calculated after they pick region)
+    return render(request, 'store/checkout.html', {'total_price': products_total})
 
 def home(request):
     products = Product.objects.all()
