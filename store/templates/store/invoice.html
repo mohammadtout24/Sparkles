@@ -2,7 +2,11 @@
 {% block content %}
 
 <div class="container" style="margin-top: 4rem; max-width: 600px; background: white; padding: 2rem; border: 1px solid #ddd; border-radius: 8px;">
-    
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="color: var(--brand-navy);">Order Confirmed!</h2>
+        <p style="font-size: 1.2rem; font-weight: bold;">Order #{{ order_id }}</p>
+        <p>Thank you for your purchase, {{ name }}.</p>
+    </div>
     <div style="text-align: center; margin-bottom: 2rem;">
         <h2 style="color: var(--brand-navy);">Order Confirmed!</h2>
         <p>Thank you for your purchase, {{ name }}.</p>
@@ -46,5 +50,6 @@
     </div>
 
 </div>
+
 
 {% endblock %}
