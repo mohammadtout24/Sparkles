@@ -7,7 +7,9 @@
 
     <div style="background: white; padding: 2rem; border: 1px solid #ddd; border-radius: 8px;">
 
-        <h3 style="text-align:center; color: var(--brand-gold);">Total: ${{ total_price }}</h3>
+        <h3 id="total-display" style="text-align:center; color: var(--brand-gold);">
+        Total: ${{ total_price }}
+        </h3>
 
         <form method="POST">
     {% csrf_token %}
@@ -24,11 +26,11 @@
 
     <div style="margin-bottom: 15px;">
         <label>Delivery Region</label>
-        <select name="region" required style="width: 100%; padding: 8px;">
-            <option value="" disabled selected>Select your location...</option>
-            <option value="tripoli">Tripoli & Suburbs</option>
-            <option value="north">North</option>
-            <option value="other">Beirut, South, Chouf, Bikaa (+$5.00)</option>
+        <select name="region" id="region-select" required style="width: 100%; padding: 8px;">
+        <option value="" disabled selected>Select your location...</option>
+        <option value="tripoli">Tripoli & Suburbs</option>
+        <option value="north">Rest of North</option>
+        <option value="other">Beirut, South, Chouf, Bekaa , ....</option>
         </select>
     </div>
 
@@ -49,5 +51,36 @@
 
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the elements
+        const regionSelect = document.getElementById('region-select');
+        const totalDisplay = document.getElementById('total-display');
+        
+        // Get the initial subtotal from Django (products only)
+        // We use parseFloat to treat it as a number
+        const baseTotal = parseFloat("{{ total_price }}");
 
+        // Listen for changes on the dropdown
+        regionSelect.addEventListener('change', function() {
+            let deliveryFee = 0;
+            const selectedRegion = this.value;
+
+            // Determine fee based on selection
+            if (selectedRegion === 'tripoli') {
+                deliveryFee = 3.00;
+            } else if (selectedRegion === 'north') {
+                deliveryFee = 4.00;
+            } else if (selectedRegion === 'other') {
+                deliveryFee = 5.00;
+            }
+
+            // Calculate new total
+            const finalTotal = baseTotal + deliveryFee;
+
+            // Update the text on screen (formatting to 2 decimal places)
+            totalDisplay.textContent = `Total: $${finalTotal.toFixed(2)}`;
+        });
+    });
+</script>
 {% endblock %}
