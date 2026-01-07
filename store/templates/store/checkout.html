@@ -1,4 +1,15 @@
-<form method="POST">
+{% extends 'store/base.html' %}
+
+{% block content %}
+
+<div class="container" style="max-width: 600px; margin-top: 4rem;">
+    <h2 class="section-title">Checkout</h2>
+
+    <div style="background: white; padding: 2rem; border: 1px solid #ddd; border-radius: 8px;">
+
+        <h3 style="text-align:center; color: var(--brand-gold);">Total: ${{ total_price }}</h3>
+
+        <form method="POST">
     {% csrf_token %}
 
     <div style="margin-bottom: 15px;">
@@ -20,7 +31,7 @@
             <option value="other">Beirut, South, Chouf, Bikaa (+$5.00)</option>
         </select>
     </div>
-    
+
     <div style="margin-bottom: 15px;">
         <label>City / Village Details</label>
         <input type="text" name="city" required placeholder="e.g. Mina, Damour, Zahle..." style="width: 100%; padding: 8px;">
@@ -35,3 +46,8 @@
         Confirm Order
     </button>
 </form>
+
+    </div>
+</div>
+
+{% endblock %}
