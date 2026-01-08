@@ -38,7 +38,7 @@
 
                         {% if product.quantity > 0 %}
                             <a href="{% url 'add_to_cart' product.pk %}" class="btn-view" style="flex: 1; text-align: center; padding: 10px 0; font-size: 0.9rem; background-color: var(--brand-navy); color: white; border: none;">
-                                Add +
+                                Add
                             </a>
                         {% else %}
                              <button class="btn-view" disabled style="flex: 1; background-color: #eee; color: #aaa; border: 1px solid #ddd; cursor: not-allowed; padding: 10px 0; font-size: 0.9rem;">
