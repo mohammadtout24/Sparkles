@@ -3,8 +3,7 @@
 {% block content %}
 
 <section class="hero" style="background-image: url('{% static "store/images/logo.PNG" %}');">
-    <!-- Optional hero text -->
-</section>
+    </section>
 
 <div class="container">
     <h2 class="section-title">Latest Collections</h2>
@@ -12,6 +11,7 @@
     <div class="product-grid">
         {% for product in products %}
             <div class="product-card">
+                
                 {% if product.image %}
                     <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
                 {% else %}
@@ -23,13 +23,30 @@
                 <div class="product-info">
                     <div class="product-category">{{ product.category.name }}</div>
                     <h3 class="product-title brand-font">{{ product.name }}</h3>
+                    
                     <div class="product-price">
-                    ${{ product.price }}
-                    {% if product.quantity == 0 %}
-                    <span style="color: red; font-size: 0.8rem; margin-left: 10px;">(Sold Out)</span>
-                    {% endif %}
+                        ${{ product.price }}
+                        {% if product.quantity == 0 %}
+                            <span style="color: red; font-size: 0.8rem; margin-left: 5px;">(Sold Out)</span>
+                        {% endif %}
                     </div>
-                    <a href="{% url 'product_detail' product.pk %}" class="btn-view">View Details</a>
+
+                    <div style="display: flex; gap: 8px; margin-top: 15px;">
+                        <a href="{% url 'product_detail' product.pk %}" class="btn-view" style="flex: 1; text-align: center; padding: 10px 0; font-size: 0.9rem;">
+                            View
+                        </a>
+
+                        {% if product.quantity > 0 %}
+                            <a href="{% url 'add_to_cart' product.pk %}" class="btn-view" style="flex: 1; text-align: center; padding: 10px 0; font-size: 0.9rem; background-color: var(--brand-navy); color: white; border: none;">
+                                Add +
+                            </a>
+                        {% else %}
+                             <button class="btn-view" disabled style="flex: 1; background-color: #eee; color: #aaa; border: 1px solid #ddd; cursor: not-allowed; padding: 10px 0; font-size: 0.9rem;">
+                                Sold
+                             </button>
+                        {% endif %}
+                    </div>
+
                 </div>
             </div>
         {% empty %}
