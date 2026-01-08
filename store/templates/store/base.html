@@ -32,10 +32,10 @@
     {% for category in menu_categories %}
        <a href="{% url 'category_list' category.slug %}">{{ category.name }}</a>
     {% endfor %}
-    <a href="{% url 'cart_view' %}" class="desktop-cart">Cart</a>
     <a href="{% url 'about' %}">Our Story</a>
     <a href="{% url 'contact' %}">Contact</a>
     <a href="{% url 'reviews' %}">Reviews</a>
+    <a href="{% url 'cart_view' %}" class="desktop-cart">Cart</a>
 </div>
     </nav>
 
