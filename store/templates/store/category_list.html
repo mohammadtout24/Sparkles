@@ -1,17 +1,46 @@
 {% extends 'store/base.html' %}
 {% block content %}
+
 <div class="container" style="margin-top: 2rem;">
     <h2 class="section-title" style="text-transform: capitalize;">{{ category.name }}</h2>
+
     <div class="product-grid">
         {% for product in products %}
             <div class="product-card">
+                
                 {% if product.image %}
                     <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+                {% else %}
+                    <div class="product-image" style="background:#ddd; display:flex; align-items:center; justify-content:center;">
+                        No Image
+                    </div>
                 {% endif %}
+
                 <div class="product-info">
                     <h3 class="product-title brand-font">{{ product.name }}</h3>
-                    <div class="product-price">${{ product.price }}</div>
-                    <a href="{% url 'product_detail' product.pk %}" class="btn-view">View Details</a>
+                    
+                    <div class="product-price">
+                        ${{ product.price }}
+                        {% if product.quantity == 0 %}
+                            <span style="color: red; font-size: 0.8rem; margin-left: 5px;">(Sold Out)</span>
+                        {% endif %}
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 15px;">
+                        <a href="{% url 'product_detail' product.pk %}" class="btn-view" style="flex: 1; text-align: center; padding: 10px 0; font-size: 0.9rem;">
+                            View
+                        </a>
+
+                        {% if product.quantity > 0 %}
+                            <a href="{% url 'add_to_cart' product.pk %}" class="btn-view" style="flex: 1; text-align: center; padding: 10px 0; font-size: 0.9rem; background-color: var(--brand-navy); color: white; border: none;">
+                                Add
+                            </a>
+                        {% else %}
+                             <button class="btn-view" disabled style="flex: 1; background-color: #eee; color: #aaa; border: 1px solid #ddd; cursor: not-allowed; padding: 10px 0; font-size: 0.9rem;">
+                                Sold
+                             </button>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         {% empty %}
@@ -19,4 +48,5 @@
         {% endfor %}
     </div>
 </div>
+
 {% endblock %}
